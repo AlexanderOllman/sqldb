@@ -102,7 +102,7 @@ def main():
             # Main Section
             with gr.Row():
                 chatbot = gr.Chatbot(
-                    label="HPE Portfolio Assistant",
+                    label="This is a test",
                     show_copy_button=True,
                     elem_id="chatbot",
                     placeholder=LOGO,
