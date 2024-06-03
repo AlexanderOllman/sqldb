@@ -171,7 +171,7 @@ def main():
         with gr.Row():
             html = gr.HTML(
             "<div >"
-            "<img src='file/images/acme.png' id='logo' alt='image One'>"
+            "<img src='file/acme.png' id='logo' alt='image One'>"
             + "</div>"
             )  
         with gr.Row():
