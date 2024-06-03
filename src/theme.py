@@ -29,6 +29,11 @@ class EzmeralTheme(Soft):
         )
         
         super().set(
+            body_background_fill="#e4e2dd",
+            block_background_fill=WHITE,
+            background_fill_primary="#eee",
+            input_background_fill="#eee",
+            block_title_background_fill=WHITE,
             button_border_width=BORDER_WIDTH,
             button_border_width_dark=BORDER_WIDTH,
             button_primary_background_fill=HPE_PRIMARY_COLOR,
