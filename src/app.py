@@ -9,11 +9,13 @@ LOGO = """
 [![Robot-final-comp.gif](https://i.postimg.cc/pry2R4S8/Robot-final-comp.gif)](https://postimg.cc/T5M8c7fY)
 """
 
-NAMESPACE = open(
-    "/var/run/secrets/kubernetes.io/serviceaccount/namespace", "r"
-).read()
+try: 
+    NAMESPACE = open(
+        "/var/run/secrets/kubernetes.io/serviceaccount/namespace", "r"
+    ).read()
+except:
+    NAMESPACE = "test"
 
-# NAMESPACE = ""
 
 URL = "http://agent.{0}:9000/{1}"
 
@@ -98,82 +100,82 @@ def upload_document(files, request: gr.Request):
 
 def main():
     with gr.Blocks(theme=EzmeralTheme(), css=custom_css) as app:
-        with gr.Tab("Chat"):
-            # Main Section
-            with gr.Row():
-                chatbot = gr.Chatbot(
-                    label="This is a test",
-                    show_copy_button=True,
-                    elem_id="chatbot",
-                    placeholder=LOGO,
-                )
-            with gr.Row():
-                with gr.Column():
-                    radio_buttons = gr.Radio(
-                        choices=["auto", "manual"],
-                        info="Select mode of operation. In auto mode, the chatbot"
-                             " will use an intelligent model to determine the flow."
-                             " In manual mode, you can choose the type of query to perform.",
-                        value="auto",
-                        show_label=False
+        with gr.Row():
+            with gr.Column():
+                with gr.Row():
+                    chatbot = gr.Chatbot(
+                        label="This is a test",
+                        show_copy_button=True,
+                        elem_id="chatbot",
+                        placeholder=LOGO,
                     )
-                with gr.Column():
-                    ctx = gr.Checkbox(
-                        value=True,
-                        label="Use Private Knowledge Base",
-                        info="Do you want to retrieve and use relevant context"
-                            " from your private knowledge database?"
-                    )
-                    manual_options = gr.Radio(
-                        choices=["Chat", "SQL Query", "Vector Store Query"],
-                        info="Select the type of query you want to perform.",
-                        visible=False,
-                        show_label=False
-                    )
-            with gr.Row():
-                msg = gr.Textbox(
-                    placeholder="Enter your message...",
-                    show_label=False,
-                    autofocus=True)
-            with gr.Row():
-                with gr.Column():
-                    submit_btn = gr.Button("Submit", variant="primary")
-                with gr.Column():
-                    clear_btn = gr.ClearButton([msg, chatbot])
-            with gr.Accordion("Advanced options", open=False):
+                with gr.Row():
+                    msg = gr.Textbox(
+                        placeholder="Enter your message...",
+                        show_label=False,
+                        autofocus=True)
                 with gr.Row():
                     with gr.Column():
-                        temperature = gr.Slider(
-                            label="Temperature",
-                            minimum=0.0,
-                            maximum=1.0,
-                            value=0.1,
-                            info="The model temperature. Larger values increase"
-                                " creativity but decrease factuality.",
-                        )
+                        submit_btn = gr.Button("Submit", variant="primary")
                     with gr.Column():
-                        max_tokens = gr.Number(
-                            label="Max Tokens",
-                            minimum=10,
-                            maximum=1000,
-                            value=200,
-                            info="The maximum number of tokens to generate.",
+                        clear_btn = gr.ClearButton([msg, chatbot])
+            with gr.Column():
+                with gr.Tab("Private Knowledge Upload"):
+                    with gr.Column(scale = 86):
+                        gr.Markdown(
+                            "<b>Upload a new PDF file and extend the private knowledge base.</b>"
                         )
-        with gr.Tab("Private Knowledge Test"):
-            with gr.Column(scale = 86):
-                gr.Markdown(
-                    "<b>Upload a new PDF file and extend the private knowledge base.</b>"
-                )
-                with gr.Row():
-                    document = gr.Files(
-                        height=300, file_count="multiple",
-                        file_types=["pdf"], interactive=True,
-                        label="Upload PDF documents")
-                with gr.Row():
-                    upload_btn = gr.Button("Upload PDF")
-                with gr.Row():
-                    db_progress = gr.Textbox(
-                        value="Waiting...", show_label=False)
+                        with gr.Row():
+                            document = gr.Files(
+                                height=300, file_count="multiple",
+                                file_types=["pdf"], interactive=True,
+                                label="Upload PDF documents")
+                        with gr.Row():
+                            upload_btn = gr.Button("Upload PDF")
+                        with gr.Row():
+                            db_progress = gr.Textbox(
+                                value="Waiting...", show_label=False)
+                with gr.Tab("Settings"):
+                    with gr.Row():
+                            radio_buttons = gr.Radio(
+                                choices=["auto", "manual"],
+                                info="Select mode of operation. In auto mode, the chatbot"
+                                    " will use an intelligent model to determine the flow."
+                                    " In manual mode, you can choose the type of query to perform.",
+                                value="auto",
+                                show_label=False
+                            )
+                            ctx = gr.Checkbox(
+                                value=True,
+                                label="Use Private Knowledge Base",
+                                info="Do you want to retrieve and use relevant context"
+                                    " from your private knowledge database?"
+                            )
+                            manual_options = gr.Radio(
+                                choices=["Chat", "SQL Query", "Vector Store Query"],
+                                info="Select the type of query you want to perform.",
+                                visible=False,
+                                show_label=False
+                            )
+                    with gr.Accordion("Advanced options", open=False):
+                        with gr.Row():
+                            with gr.Column():
+                                temperature = gr.Slider(
+                                    label="Temperature",
+                                    minimum=0.0,
+                                    maximum=1.0,
+                                    value=0.1,
+                                    info="The model temperature. Larger values increase"
+                                        " creativity but decrease factuality.",
+                                )
+                            with gr.Column():
+                                max_tokens = gr.Number(
+                                    label="Max Tokens",
+                                    minimum=10,
+                                    maximum=1000,
+                                    value=200,
+                                    info="The maximum number of tokens to generate.",
+                                )
 
         inputs = [msg, chatbot, temperature, max_tokens, ctx, manual_options]
 
@@ -189,7 +191,8 @@ def main():
 
         msg.submit(chat_service, inputs, [msg, chatbot])
 
-    app.launch(server_name="0.0.0.0", server_port=8080)
+    # app.launch(server_name="0.0.0.0", server_port=8080)
+    app.launch()
 
 
 if __name__ == "__main__":

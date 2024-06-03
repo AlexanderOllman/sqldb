@@ -1,6 +1,6 @@
 from typing import Union
 
-from gradio.themes import Base
+from gradio.themes import Base, Soft
 from gradio.themes.utils import colors
 
 
@@ -15,7 +15,7 @@ BORDER_RADIUS = "100px"
 INPUT_BORDER_WIDTH = "1px"
 
 
-class EzmeralTheme(Base):
+class EzmeralTheme(Soft):
     def __init__(
             self,
             *,
