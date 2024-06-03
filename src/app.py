@@ -5,9 +5,9 @@ import requests
 from theme import EzmeralTheme
 
 
-LOGO = """
-[![Robot-final-comp.gif](https://i.postimg.cc/pry2R4S8/Robot-final-comp.gif)](https://postimg.cc/T5M8c7fY)
-"""
+# LOGO = """
+# [![Robot-final-comp.gif](https://i.postimg.cc/pry2R4S8/Robot-final-comp.gif)](https://postimg.cc/T5M8c7fY)
+# """
 
 WELCOME = '''Hi! I'm Gema, your Acme sales and quoting AI powered by HPE & NVIDIA. 
 
@@ -283,8 +283,8 @@ def main():
 
         msg.submit(chat_service, inputs, [msg, chatbot])
 
-    # app.launch(server_name="0.0.0.0", server_port=8080)
-    app.launch(allowed_paths=["."])
+    app.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=["."])
+    # app.launch(allowed_paths=["."])
 
 
 if __name__ == "__main__":
