@@ -248,11 +248,9 @@ def main():
             with gr.Column(scale=2):
                 with gr.Row():
                     chatbot = gr.Chatbot(
-                        value=[[None, WELCOME]],
                         label="SalesAI",
                         show_copy_button=True,
-                        elem_id="chatbot",
-                        elem_classes=["container"]
+                        elem_id="chatbot"
                     )
                 with gr.Row():
                     msg = gr.Textbox(
