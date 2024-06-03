@@ -140,11 +140,9 @@ def chat_service(
 
 def update_ui(choice):
     if choice == "Smart":
-        return gr.update(
-            visible=True, value=True), gr.update(visible=False, value=None)
+        return gr.update(visible=False, value=None)
     else:
-        return gr.update(
-            visible=False, value=False), gr.update(visible=True, value="Chat", interactive=True)
+        return gr.update(visible=True, value="Chat", interactive=True)
 
 
 def upload_document(files, request: gr.Request):
@@ -277,7 +275,7 @@ def main():
         radio_buttons.change(
             update_ui, 
             radio_buttons, 
-            [ctx, manual_options]
+            manual_options
         )
 
         msg.submit(chat_service, inputs, [msg, chatbot])
