@@ -254,7 +254,6 @@ def main():
                         label="SalesAI",
                         show_copy_button=True,
                         elem_id="chatbot",
-                        placeholder=LOGO,
                         elem_classes=["container"]
                     )
                 with gr.Row():
