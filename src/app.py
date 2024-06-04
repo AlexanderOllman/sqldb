@@ -30,6 +30,7 @@ custom_css = """
 #chatbot {
     height: calc(60vh - 50px) !important; /* Adjust the height as needed */
     overflow: auto;
+    margin-top: 32px;
 }
 
 .tab{
@@ -171,7 +172,7 @@ def main():
         with gr.Row():
             html = gr.HTML(
             "<div >"
-            "<img src='file/acme.png' id='logo' alt='image One'>"
+            "<img src='/file=images/acme.png' id='logo' alt='image One'>"
             + "</div>"
             )  
         with gr.Row():
