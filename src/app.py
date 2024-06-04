@@ -304,8 +304,8 @@ def main():
 
         msg.submit(chat_service, inputs, [msg, chatbot])
 
-    # app.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=["."])
-    app.launch(allowed_paths=["."])
+    app.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=["."])
+    # app.launch(allowed_paths=["."])
 
 
 if __name__ == "__main__":
