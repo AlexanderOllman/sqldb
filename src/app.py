@@ -9,7 +9,7 @@ from theme import EzmeralTheme
 # [![Robot-final-comp.gif](https://i.postimg.cc/pry2R4S8/Robot-final-comp.gif)](https://postimg.cc/T5M8c7fY)
 # """
 
-WELCOME = '''Hi! I'm Gema, your Acme sales and quoting AI powered by HPE & NVIDIA. 
+WELCOME = '''Hi! I'm the HPE Portfolio Assistant, your sales information and quote builder AI powered by HPE GreenLake & NVIDIA. 
 
 How can I help?'''
 
@@ -141,11 +141,19 @@ def chat_service(
 
 def update_ui(choice):
     if choice == "Smart":
-        return gr.update(visible=False, value=None)
+        return gr.update(
+            visible=True, value="Yes"), gr.update(visible=False, value=None)
     else:
-        return gr.update(visible=True, value="Chat", interactive=True)
+        return gr.update(
+            visible=False, value="No"), gr.update(visible=True, value="Chat", interactive=True)
 
 
+def update_theme(choice):
+    if choice == "None":
+        return [gr.update(visible=False), gr.update(label="Chat")]
+    else:
+        return [gr.update(visible=True), gr.update(label="HPE Portfolio Assistant")]
+    
 def upload_document(files, request: gr.Request):
     headers = {"Authorization": request.headers.get("authorization")}
 
@@ -162,9 +170,13 @@ def upload_document(files, request: gr.Request):
         
     if response.status_code == 200:
         logger.info("Files uploaded successfully.")
-        return f"{str(len(files))} files uploaded successfully."
+        if len(files) == 1:
+            message = f"{str(len(files))} file uploaded successfully."
+        else:
+            message = f"{str(len(files))} files uploaded successfully."
+        return [gr.update(value=None), message]
 
-    return "An error occurred while uploading files. Please try again."
+    return [gr.update(value=None), "An error occurred while uploading files. Please try again."]
 
 
 def main(): 
@@ -172,9 +184,9 @@ def main():
         with gr.Row():
             html = gr.HTML(
             "<div >"
-            "<img src='/file=images/acme.png' id='logo' alt='image One'>"
+            "<img src='/file=images/greenlake.png' id='logo' alt='image One'>"
             + "</div>"
-            )  
+            , visible=False)  
         with gr.Row():
             with gr.Column(scale=1, elem_classes=["left"]):
                 # gr.Markdown(
@@ -188,8 +200,10 @@ def main():
                             label="Upload PDF documents",
                             show_label=False)
                     with gr.Row():
+                        upload_btn = gr.Button("Upload")
+                    with gr.Row():
                         db_progress = gr.Label(
-                            value="No files uploaded.", show_label=False, elem_classes=["upload-label"])
+                            value="", show_label=False, elem_classes=["upload-label"])
                     with gr.Row():
                         # ctx = gr.Checkbox(
                         #     value=True,
@@ -202,10 +216,17 @@ def main():
                             value="Yes",
                             elem_classes=["menu-item"]
                         )
+                        manual_options = gr.Radio(
+                            choices=["Chat", "SQL Query", "Vector Store Query"],
+                            info="Select the type of query you want to perform.",
+                            visible=False,
+                            label="Chat Mode",
+                            elem_classes=["menu-item"]
+                        )
                 with gr.Tab("Settings"):
                     with gr.Row():
                         model = gr.Dropdown(
-                            ["meta-llama/Meta-Llama-2-7B", "meta-llama/Meta-Llama-3-8B", "microsoft/Phi-3-mini-128k-instruct"], interactive=True, allow_custom_value=True, value="meta-llama/Meta-Llama-2-7B", label="Large Language Model", elem_classes=["menu-item"]
+                            ["meta-llama/Meta-Llama-2-7B", "meta-llama/Meta-Llama-3-8B", "microsoft/Phi-3-mini-128k-instruct", "mistralai/Mistral-7B-v0.3"], interactive=True, allow_custom_value=True, value="meta-llama/Meta-Llama-2-7B", label="Large Language Model", elem_classes=["menu-item"]
                             )    
                     with gr.Row():
                         radio_buttons = gr.Radio(
@@ -215,14 +236,6 @@ def main():
                                 " In manual mode, you can choose the type of query to perform.",
                             value="Smart",
                             label="AI Mode",
-                            elem_classes=["menu-item"]
-                        )
-                    with gr.Row():
-                        manual_options = gr.Radio(
-                            choices=["Chat", "SQL Query", "Vector Store Query"],
-                            info="Select the type of query you want to perform.",
-                            visible=False,
-                            label="Manual Chat Mode",
                             elem_classes=["menu-item"]
                         )
                 with gr.Tab("Advanced"):     
@@ -245,11 +258,17 @@ def main():
                                     value=200,
                                     info="The maximum number of tokens to generate.",
                                     elem_classes=["menu-item"]
-                                )
+                                )                        
+                                theme = gr.Radio(
+                                choices=["None", "HPE Portfolio Assistant"],
+                                value="None",
+                                label="Theme",
+                                elem_classes=["menu-item"]
+                            )
             with gr.Column(scale=2):
                 with gr.Row():
                     chatbot = gr.Chatbot(
-                        label="SalesAI",
+                        label="Chat",
                         show_copy_button=True,
                         elem_id="chatbot"
                     )
@@ -267,20 +286,26 @@ def main():
         inputs = [msg, chatbot, temperature, max_tokens, ctx, manual_options]
 
         submit_btn.click(chat_service, inputs, [msg, chatbot])
-        # upload_btn.click(
-        #     upload_document, inputs=[document], outputs=[db_progress])
-        document.change(upload_document, inputs=[document], outputs=[db_progress])
+        upload_btn.click(
+            upload_document, inputs=[document], outputs=[upload_btn, db_progress], )
+        # document.change(upload_document, inputs=[document], outputs=[db_progress])
         clear_btn.click
         radio_buttons.change(
             update_ui, 
             radio_buttons, 
-            manual_options
+            [ctx, manual_options]
         )
+        theme.change(
+            update_theme,
+            theme,
+            [html, chatbot] 
+        )
+
 
         msg.submit(chat_service, inputs, [msg, chatbot])
 
-    app.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=["."])
-    # app.launch(allowed_paths=["."])
+    # app.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=["."])
+    app.launch(allowed_paths=["."])
 
 
 if __name__ == "__main__":
