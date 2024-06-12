@@ -1,7 +1,7 @@
 import inspect
 import time
 from typing import Iterable
-from theme import EzmeralTheme
+from pa_theme import PortfolioAssistant
 
 from gradio_client.documentation import document_fn
 
@@ -100,25 +100,6 @@ def update_ui(choice):
             visible=False, value="No"), gr.update(visible=True, value="Chat", interactive=True)
 
 
-def load_theme():
-    loaded_text = []
-    loaded_css = "theme.css"
-    try:
-        with open(session_file, 'r') as file:  # Open the file in read mode
-            for line in file:
-                loaded_text.append(line.strip())  # Strip newline characters and add to array
-        print("File successfully read into an array.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-    print(loaded_text)
-    if loaded_text[0] == "None":
-        loaded_theme = gr.themes.Soft(primary_hue="slate")
-    else:
-        loaded_theme = EzmeralTheme()
-
-    return loaded_theme, loaded_css
-
-
 def update_theme(choice, inputs):
     # try:
     #     with open(session_file, 'w') as file:
@@ -168,7 +149,7 @@ themes = [
     gr.themes.Soft,
     gr.themes.Monochrome,
     gr.themes.Glass,
-    EzmeralTheme
+    PortfolioAssistant
 ]
 colors = gr.themes.Color.all
 sizes = gr.themes.Size.all
@@ -530,13 +511,7 @@ with gr.Blocks(  # noqa: SIM117
                     html = gr.Markdown(
                     """
                     ![GreenLake](/file=greenlake.png)
-                    """
-                    )
-                    html2 = gr.Markdown(
-                    """
-                    ![GreenLake](/file=greenlake.png)
-                    """
-                    )
+                    """)
                 with gr.Row():
                     chatbot = gr.Chatbot(
                         label="Chat",
