@@ -5,6 +5,8 @@ from gradio.themes.utils import colors
 
 
 WHITE = "#FFFFFF"
+GREY = "#EEE"
+BACKGROUND_COLOR = "#F9FAFB"
 BACKGOUND_COLOR_DARK = "#374151"
 HPE_PRIMARY_COLOR = "#01A982"
 HPE_PRIMARY_COLOR_DARK = "#008567"
@@ -20,20 +22,22 @@ class EzmeralTheme(Soft):
             self,
             *,
             primary_hue: Union[colors.Color, str] = colors.emerald,
+            secondary_hue: Union[colors.Color, str] = colors.emerald,
             neutral_hue: Union[colors.Color, str] = colors.gray,
             ):
         super().__init__(
             primary_hue=primary_hue,
-            secondary_hue=primary_hue,
+            secondary_hue=secondary_hue,
             neutral_hue=neutral_hue
         )
         
         super().set(
-            body_background_fill="#e4e2dd",
+            body_background_fill=BACKGROUND_COLOR,
             block_background_fill=WHITE,
-            background_fill_primary="#eee",
-            input_background_fill="#eee",
-            block_title_background_fill=WHITE,
+            background_fill_primary=GREY,
+            input_background_fill=GREY,
+            block_title_background_fill=HPE_PRIMARY_COLOR,
+            block_title_text_color=GREY,
             button_border_width=BORDER_WIDTH,
             button_border_width_dark=BORDER_WIDTH,
             button_primary_background_fill=HPE_PRIMARY_COLOR,
@@ -61,5 +65,6 @@ class EzmeralTheme(Soft):
             input_border_color_focus=HPE_PRIMARY_COLOR,
             input_border_color_focus_dark=HPE_PRIMARY_COLOR,
             input_border_color_hover=HPE_PRIMARY_COLOR,
-            input_border_color_hover_dark=HPE_PRIMARY_COLOR
+            input_border_color_hover_dark=HPE_PRIMARY_COLOR,
+            checkbox_background_color_selected=HPE_PRIMARY_COLOR
             )
