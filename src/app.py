@@ -1027,6 +1027,5 @@ with gr.Blocks(theme=theme) as demo:
 if __name__ == "__main__":
     file_path = os.path.abspath("images/greenlake.png")
     absolute_path = os.path.dirname(file_path)
-    print(absolute_path)
-    # demo.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=["/images"])
-    demo.launch(allowed_paths=[absolute_path])
+    demo.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=[absolute_path])
+    # demo.launch(allowed_paths=[absolute_path])
