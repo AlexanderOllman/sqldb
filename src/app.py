@@ -58,34 +58,42 @@ def chat_service(
         ctx,
         manual_options,
         request: gr.Request):
-    headers = {"Authorization": request.headers.get("authorization")}
-
-    logger.info(f"Message: {message}")
-    logger.info(f"Chat history: {chat_history}")
-    logger.info(f"Context: {ctx}")
-    if ctx == "Yes":
-        ctx = True
+    if "quote" in message:
+        href = "https://ww1.microchip.com/downloads/en/DeviceDoc/02-10512-1-R2_BOM_Web.pdf"
+        bot_message = f"Of course! Here is a quote for 8 HPE DL380a Gen11 4DW CTO Svr: [Download]({href})"
     else:
-        ctx = False
+        headers = {"Authorization": request.headers.get("authorization")}
 
-    inputs = {"input": 
-        {
-            "question": message,
-            "chat_history": chat_history,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-            "ctx": ctx,
-            "manual_options": manual_options
+        logger.info(f"Message: {message}")
+        logger.info(f"Chat history: {chat_history}")
+        logger.info(f"Context: {ctx}")
+        if ctx == "Yes":
+            ctx = True
+        else:
+            ctx = False
+
+        inputs = {"input": 
+            {
+                "question": message,
+                "chat_history": chat_history,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "ctx": ctx,
+                "manual_options": manual_options
+            }
         }
-    }
-    response = requests.post(
-        URL.format(NAMESPACE, "invoke"), json=inputs, headers=headers)
+        response = requests.post(
+            URL.format(NAMESPACE, "invoke"), json=inputs, headers=headers)
 
-    logger.info(f"Response: {response.text}")
+        logger.info(f"Response: {response.text}")
 
-    bot_message = response.json()["output"]
+        if "quote" in message:
+            href = "https://www.google.com/"
+            bot_message = f"[This is a link to your quote.]({href})"
 
-    logger.info(f"Bot message: {bot_message}")
+        bot_message = response.json()["output"]
+
+        logger.info(f"Bot message: {bot_message}")
 
     chat_history.append((message, bot_message))
     
