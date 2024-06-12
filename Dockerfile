@@ -5,7 +5,7 @@ WORKDIR /workspace
 ADD src/requirements.txt /workspace/requirements.txt
 RUN pip install -r requirements.txt
 
-ADD src/app.py src/pa_theme.py src/greenlake.png /workspace/
+ADD src/app.py src/pa_theme.py src/hungry_theme.py  src/greenlake.png src/hungrypal.png /workspace/
 
 ENV HOME=/workspace
 

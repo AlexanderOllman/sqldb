@@ -2,6 +2,7 @@ import inspect
 import time
 from typing import Iterable
 from pa_theme import PortfolioAssistant
+from hungry_theme import HungryPalExpress
 
 from gradio_client.documentation import document_fn
 
@@ -149,7 +150,8 @@ themes = [
     gr.themes.Soft,
     gr.themes.Monochrome,
     gr.themes.Glass,
-    PortfolioAssistant
+    PortfolioAssistant,
+    HungryPalExpress
 ]
 colors = gr.themes.Color.all
 sizes = gr.themes.Size.all
@@ -213,6 +215,33 @@ css = """
   box-shadow: 0 0 1px rgba(255, 255, 255, .5);
 }
 """
+
+def change_image(theme):
+
+    if theme == "PortfolioAssistant":
+        html = """
+        <div style='text-align: center;' id="title-div">
+            <img src='/file=greenlake.png' alt='title-image' 
+                style='max-width: 100%;
+                height: auto;' id="title-image">
+        </div>
+        """
+        vis = True
+        label = "HPE Portfolio Assistant"
+    elif theme == "HungryPalExpress":
+        html = """
+        <div style='text-align: center;' id="title-div">
+            <img src='/file=hungrypal.png' alt='title-image' id="title-image">
+        </div>
+        """
+        vis = True
+        label = "Ordering Assistant"
+    else:
+        html = ""
+        vis = False
+        label = "Chat"
+
+    return [gr.update(value=html),gr.update(visible=vis), gr.update(label=label)]
 
 with gr.Blocks(  # noqa: SIM117
     theme=gr.themes.Base(),
@@ -299,17 +328,13 @@ with gr.Blocks(  # noqa: SIM117
                     undo_btn = gr.Button("Undo", size="sm")
                     dark_mode_btn = gr.Button("Dark Mode", variant="primary", size="sm")
                 with gr.Row():
-                    gr.Markdown(
-                            """
-                        Select a base theme below you would like to build off of. Note: when you click 'Load Theme', all variable values in other tabs will be overwritten!
-                        """
-                        )
-                with gr.Row():
                     base_theme_dropdown = gr.Dropdown(
                         [theme.__name__ for theme in themes],
                         value="Base",
                         show_label=False,
                         label="Theme",
+                        info= "Select a base theme below you would like to build off of. Note: when you click 'Load Theme', all variable values in other tabs will be overwritten!"
+
                     )
                 with gr.Row():
                     load_theme_btn = gr.Button("Load Theme", elem_id="load_theme")
@@ -503,15 +528,18 @@ with gr.Blocks(  # noqa: SIM117
             # App
 
         with gr.Column(scale=6, elem_id="app"):
+            with gr.Row():
+                html = gr.HTML("""
+                    <div style='text-align: center;' id="title-div">
+                    </div>
+                """, visible=False)
+                # html = gr.Markdown(
+                # """
+                # ![GreenLake](/file=hungrypal.png)
+                # """)
             with gr.Column(variant="panel"):
                 with gr.Accordion("View Code", open=False, visible=False):
                     output_code = gr.Code(language="python")
-
-                with gr.Row():
-                    html = gr.Markdown(
-                    """
-                    ![GreenLake](/file=greenlake.png)
-                    """)
                 with gr.Row():
                     chatbot = gr.Chatbot(
                         label="Chat",
@@ -541,6 +569,8 @@ with gr.Blocks(  # noqa: SIM117
             radio_buttons, 
             [ctx, manual_options]
         )
+
+        base_theme_dropdown.change(change_image, base_theme_dropdown, [html, html, chatbot])
 
 
 
@@ -1001,4 +1031,4 @@ with gr.Blocks(theme=theme) as demo:
 
 if __name__ == "__main__":
     demo.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=["./"])
-    # demo.launch(allowed_paths=["./"])git 
+    # demo.launch(allowed_paths=["./"])
