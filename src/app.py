@@ -452,10 +452,11 @@ with gr.Blocks(  # noqa: SIM117
                     output_code = gr.Code(language="python")
 
                 with gr.Row():
-                    html = gr.HTML(
-                    "<div>"
-                    "<img src='file/greenlake.png' id='logo' alt='image One'>"
-                    + "</div>")  
+                    html = gr.Markdown(
+                    """
+                    ![GreenLake](/file=images/greenlake.png)
+                    """
+                    )
                 with gr.Row():
                     with gr.Column(scale=1, elem_classes=["left"]):
                         # gr.Markdown(
