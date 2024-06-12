@@ -240,212 +240,286 @@ with gr.Blocks(  # noqa: SIM117
 ) as demo:
     with gr.Row():
         with gr.Column(scale=1, elem_id="controls", min_width=400):
-            with gr.Row():
-                undo_btn = gr.Button("Undo", size="sm")
-                dark_mode_btn = gr.Button("Dark Mode", variant="primary", size="sm")
-            with gr.Row():
-                gr.Markdown(
-                        """
-                    Select a base theme below you would like to build off of. Note: when you click 'Load Theme', all variable values in other tabs will be overwritten!
-                    """
+            with gr.Tab("Settings"):
+                with gr.Row() as upload_field:
+                    document = gr.Files(
+                        height=300, file_count="multiple",
+                        file_types=["pdf"], interactive=True,
+                        label="Upload PDF documents",
+                        show_label=False)
+                with gr.Row() as upload_button:
+                    upload_btn = gr.Button("Upload")
+                with gr.Row() as upload_label:
+                    db_progress = gr.Label(
+                        value="", show_label=False, elem_classes=["upload-label"])
+                with gr.Row():
+                    # ctx = gr.Checkbox(
+                    #     value=True,
+                    #     label="Use Private Knowledge Base"
+                    # )
+                    ctx = gr.Radio(
+                        choices=["Yes", "No"],
+                        info="Give access to the uploaded files stored in your Private Knowledge Base?",
+                        label="Private Knowledge Base",
+                        value="Yes",
+                        elem_classes=["menu-item"]
                     )
-            with gr.Row():
-                base_theme_dropdown = gr.Dropdown(
-                    [theme.__name__ for theme in themes],
-                    value="Base",
-                    show_label=False,
-                    label="Theme",
-                )
-            with gr.Row():
-                load_theme_btn = gr.Button("Load Theme", elem_id="load_theme")
-            with gr.Tabs(visible=False):                
-                with gr.TabItem("Core Colors"):
-                    gr.Markdown(
-                        """Set the three hues of the theme: `primary_hue`, `secondary_hue`, and `neutral_hue`.
-                        Each of these is a palette ranging from 50 to 950 in brightness. Pick a preset palette - optionally, open the accordion to overwrite specific values.
-                        Note that these variables do not affect elements directly, but are referenced by other variables with asterisks, such as `*primary_200` or `*neutral_950`."""
+                with gr.Row():
+                    radio_buttons = gr.Radio(
+                        choices=["Smart", "Manual"],
+                        info="Select mode of operation. In Smart mode, the chatbot"
+                            " will use an intelligent model to determine the flow."
+                            " In manual mode, you can choose the type of query to perform.",
+                        value="Smart",
+                        label="AI Mode",
+                        elem_classes=["menu-item"]
                     )
-                    primary_hue = gr.Dropdown(
-                        [color.name for color in colors], label="Primary Hue"
+                with gr.Row():
+                    manual_options = gr.Radio(
+                        choices=["Chat", "SQL Query", "Vector Store Query"],
+                        info="Select the type of query you want to perform.",
+                        visible=False,
+                        label="Chat Mode",
+                        elem_classes=["menu-item"]
                     )
-                    with gr.Accordion(label="Primary Hue Palette", open=False):
-                        primary_hues = []
-                        for i in palette_range:
-                            primary_hues.append(
-                                gr.ColorPicker(
-                                    label=f"primary_{i}",
-                                )
-                            )
-
-                    secondary_hue = gr.Dropdown(
-                        [color.name for color in colors], label="Secondary Hue"
-                    )
-                    with gr.Accordion(label="Secondary Hue Palette", open=False):
-                        secondary_hues = []
-                        for i in palette_range:
-                            secondary_hues.append(
-                                gr.ColorPicker(
-                                    label=f"secondary_{i}",
-                                )
-                            )
-
-                    neutral_hue = gr.Dropdown(
-                        [color.name for color in colors], label="Neutral hue"
-                    )
-                    with gr.Accordion(label="Neutral Hue Palette", open=False):
-                        neutral_hues = []
-                        for i in palette_range:
-                            neutral_hues.append(
-                                gr.ColorPicker(
-                                    label=f"neutral_{i}",
-                                )
-                            )
-
-                with gr.TabItem("Core Sizing"):
-                    gr.Markdown(
-                        """Set the sizing of the theme via: `text_size`, `spacing_size`, and `radius_size`.
-                        Each of these is set to a collection of sizes ranging from `xxs` to `xxl`. Pick a preset size collection - optionally, open the accordion to overwrite specific values.
-                        Note that these variables do not affect elements directly, but are referenced by other variables with asterisks, such as `*spacing_xl` or `*text_sm`.
-                        """
-                    )
-                    text_size = gr.Dropdown(
-                        [size.name for size in sizes if size.name.startswith("text_")],
-                        label="Text Size",
-                    )
-                    with gr.Accordion(label="Text Size Range", open=False):
-                        text_sizes = []
-                        for i in size_range:
-                            text_sizes.append(
-                                gr.Textbox(
-                                    label=f"text_{i}",
-                                )
-                            )
-
-                    spacing_size = gr.Dropdown(
-                        [
-                            size.name
-                            for size in sizes
-                            if size.name.startswith("spacing_")
-                        ],
-                        label="Spacing Size",
-                    )
-                    with gr.Accordion(label="Spacing Size Range", open=False):
-                        spacing_sizes = []
-                        for i in size_range:
-                            spacing_sizes.append(
-                                gr.Textbox(
-                                    label=f"spacing_{i}",
-                                )
-                            )
-
-                    radius_size = gr.Dropdown(
-                        [
-                            size.name
-                            for size in sizes
-                            if size.name.startswith("radius_")
-                        ],
-                        label="Radius Size",
-                    )
-                    with gr.Accordion(label="Radius Size Range", open=False):
-                        radius_sizes = []
-                        for i in size_range:
-                            radius_sizes.append(
-                                gr.Textbox(
-                                    label=f"radius_{i}",
-                                )
-                            )
-
-                with gr.TabItem("Core Fonts"):
-                    gr.Markdown(
-                        """Set the main `font` and the monospace `font_mono` here.
-                        Set up to 4 values for each (fallbacks in case a font is not available).
-                        Check "Google Font" if font should be loaded from Google Fonts.
-                        """
-                    )
-                    gr.Markdown("### Main Font")
-                    main_fonts, main_is_google = [], []
-                    for i in range(4):
-                        with gr.Row():
-                            font = gr.Textbox(label=f"Font {i + 1}")
-                            font_is_google = gr.Checkbox(label="Google Font")
-                            main_fonts.append(font)
-                            main_is_google.append(font_is_google)
-
-                    mono_fonts, mono_is_google = [], []
-                    gr.Markdown("### Monospace Font")
-                    for i in range(4):
-                        with gr.Row():
-                            font = gr.Textbox(label=f"Font {i + 1}")
-                            font_is_google = gr.Checkbox(label="Google Font")
-                            mono_fonts.append(font)
-                            mono_is_google.append(font_is_google)
-
-                theme_var_input = []
-
-                core_color_suggestions = (
-                    [f"*primary_{i}" for i in palette_range]
-                    + [f"*secondary_{i}" for i in palette_range]
-                    + [f"*neutral_{i}" for i in palette_range]
-                )
-
-                variable_suggestions = {
-                    "fill": core_color_suggestions[:],
-                    "color": core_color_suggestions[:],
-                    "text_size": [f"*text_{i}" for i in size_range],
-                    "radius": [f"*radius_{i}" for i in size_range],
-                    "padding": [f"*spacing_{i}" for i in size_range],
-                    "gap": [f"*spacing_{i}" for i in size_range],
-                    "weight": [
-                        "100",
-                        "200",
-                        "300",
-                        "400",
-                        "500",
-                        "600",
-                        "700",
-                        "800",
-                    ],
-                    "shadow": ["none"],
-                    "border_width": [],
-                }
-                for variable in flat_variables:
-                    if variable.endswith("_dark"):
-                        continue
-                    for style_type in variable_suggestions:
-                        if style_type in variable:
-                            variable_suggestions[style_type].append("*" + variable)
-                            break
-
-                variable_suggestions["fill"], variable_suggestions["color"] = (
-                    variable_suggestions["fill"]
-                    + variable_suggestions["color"][len(core_color_suggestions) :],
-                    variable_suggestions["color"]
-                    + variable_suggestions["fill"][len(core_color_suggestions) :],
-                )
-
-                for group, desc, variables in variable_groups:
-                    with gr.TabItem(group):
-                        gr.Markdown(
-                            desc
-                            + "\nYou can set these to one of the dropdown values, or clear the dropdown to set a custom value."
+            with gr.Tab("Advanced"):
+                with gr.Row():
+                    model = gr.Dropdown(
+                        ["meta-llama/Meta-Llama-2-7B", "meta-llama/Meta-Llama-3-8B", "microsoft/Phi-3-mini-128k-instruct", "mistralai/Mistral-7B-v0.3"], interactive=True, allow_custom_value=True, value="meta-llama/Meta-Llama-2-7B", label="Large Language Model", elem_classes=["menu-item"]
+                        )    
+                with gr.Row():
+                    with gr.Column():
+                        temperature = gr.Slider(
+                            label="Temperature",
+                            minimum=0.0,
+                            maximum=1.0,
+                            value=0.1,
+                            info="The model temperature. Larger values increase"
+                                " creativity but decrease factuality.",
+                                elem_classes=["menu-item"]
                         )
-                        for variable in variables:
-                            suggestions = []
-                            for style_type in variable_suggestions:
-                                if style_type in variable:
-                                    suggestions = variable_suggestions[style_type][:]
-                                    if "*" + variable in suggestions:
-                                        suggestions.remove("*" + variable)
-                                    break
-                            dropdown = gr.Dropdown(
-                                label=variable,
-                                info=get_docstr(variable),
-                                choices=suggestions,
-                                allow_custom_value=True,
-                            )
-                            theme_var_input.append(dropdown)
+                    with gr.Column():
+                        max_tokens = gr.Number(
+                            label="Max Tokens",
+                            minimum=10,
+                            maximum=1000,
+                            value=200,
+                            info="The maximum number of tokens to generate.",
+                            elem_classes=["menu-item"]
+                        )                        
+                        theme = gr.Radio(
+                        choices=["None", "HPE Portfolio Assistant"],
+                        value="None",
+                        label="Theme",
+                        elem_classes=["menu-item"]
+                    )
+            with gr.Tab("Theme"):
+                with gr.Row():
+                    undo_btn = gr.Button("Undo", size="sm")
+                    dark_mode_btn = gr.Button("Dark Mode", variant="primary", size="sm")
+                with gr.Row():
+                    gr.Markdown(
+                            """
+                        Select a base theme below you would like to build off of. Note: when you click 'Load Theme', all variable values in other tabs will be overwritten!
+                        """
+                        )
+                with gr.Row():
+                    base_theme_dropdown = gr.Dropdown(
+                        [theme.__name__ for theme in themes],
+                        value="Base",
+                        show_label=False,
+                        label="Theme",
+                    )
+                with gr.Row():
+                    load_theme_btn = gr.Button("Load Theme", elem_id="load_theme")
+                with gr.Tabs(visible=False):                
+                    with gr.TabItem("Core Colors"):
+                        gr.Markdown(
+                            """Set the three hues of the theme: `primary_hue`, `secondary_hue`, and `neutral_hue`.
+                            Each of these is a palette ranging from 50 to 950 in brightness. Pick a preset palette - optionally, open the accordion to overwrite specific values.
+                            Note that these variables do not affect elements directly, but are referenced by other variables with asterisks, such as `*primary_200` or `*neutral_950`."""
+                        )
+                        primary_hue = gr.Dropdown(
+                            [color.name for color in colors], label="Primary Hue"
+                        )
+                        with gr.Accordion(label="Primary Hue Palette", open=False):
+                            primary_hues = []
+                            for i in palette_range:
+                                primary_hues.append(
+                                    gr.ColorPicker(
+                                        label=f"primary_{i}",
+                                    )
+                                )
 
-        # App
+                        secondary_hue = gr.Dropdown(
+                            [color.name for color in colors], label="Secondary Hue"
+                        )
+                        with gr.Accordion(label="Secondary Hue Palette", open=False):
+                            secondary_hues = []
+                            for i in palette_range:
+                                secondary_hues.append(
+                                    gr.ColorPicker(
+                                        label=f"secondary_{i}",
+                                    )
+                                )
+
+                        neutral_hue = gr.Dropdown(
+                            [color.name for color in colors], label="Neutral hue"
+                        )
+                        with gr.Accordion(label="Neutral Hue Palette", open=False):
+                            neutral_hues = []
+                            for i in palette_range:
+                                neutral_hues.append(
+                                    gr.ColorPicker(
+                                        label=f"neutral_{i}",
+                                    )
+                                )
+
+                    with gr.TabItem("Core Sizing"):
+                        gr.Markdown(
+                            """Set the sizing of the theme via: `text_size`, `spacing_size`, and `radius_size`.
+                            Each of these is set to a collection of sizes ranging from `xxs` to `xxl`. Pick a preset size collection - optionally, open the accordion to overwrite specific values.
+                            Note that these variables do not affect elements directly, but are referenced by other variables with asterisks, such as `*spacing_xl` or `*text_sm`.
+                            """
+                        )
+                        text_size = gr.Dropdown(
+                            [size.name for size in sizes if size.name.startswith("text_")],
+                            label="Text Size",
+                        )
+                        with gr.Accordion(label="Text Size Range", open=False):
+                            text_sizes = []
+                            for i in size_range:
+                                text_sizes.append(
+                                    gr.Textbox(
+                                        label=f"text_{i}",
+                                    )
+                                )
+
+                        spacing_size = gr.Dropdown(
+                            [
+                                size.name
+                                for size in sizes
+                                if size.name.startswith("spacing_")
+                            ],
+                            label="Spacing Size",
+                        )
+                        with gr.Accordion(label="Spacing Size Range", open=False):
+                            spacing_sizes = []
+                            for i in size_range:
+                                spacing_sizes.append(
+                                    gr.Textbox(
+                                        label=f"spacing_{i}",
+                                    )
+                                )
+
+                        radius_size = gr.Dropdown(
+                            [
+                                size.name
+                                for size in sizes
+                                if size.name.startswith("radius_")
+                            ],
+                            label="Radius Size",
+                        )
+                        with gr.Accordion(label="Radius Size Range", open=False):
+                            radius_sizes = []
+                            for i in size_range:
+                                radius_sizes.append(
+                                    gr.Textbox(
+                                        label=f"radius_{i}",
+                                    )
+                                )
+
+                    with gr.TabItem("Core Fonts"):
+                        gr.Markdown(
+                            """Set the main `font` and the monospace `font_mono` here.
+                            Set up to 4 values for each (fallbacks in case a font is not available).
+                            Check "Google Font" if font should be loaded from Google Fonts.
+                            """
+                        )
+                        gr.Markdown("### Main Font")
+                        main_fonts, main_is_google = [], []
+                        for i in range(4):
+                            with gr.Row():
+                                font = gr.Textbox(label=f"Font {i + 1}")
+                                font_is_google = gr.Checkbox(label="Google Font")
+                                main_fonts.append(font)
+                                main_is_google.append(font_is_google)
+
+                        mono_fonts, mono_is_google = [], []
+                        gr.Markdown("### Monospace Font")
+                        for i in range(4):
+                            with gr.Row():
+                                font = gr.Textbox(label=f"Font {i + 1}")
+                                font_is_google = gr.Checkbox(label="Google Font")
+                                mono_fonts.append(font)
+                                mono_is_google.append(font_is_google)
+
+                    theme_var_input = []
+
+                    core_color_suggestions = (
+                        [f"*primary_{i}" for i in palette_range]
+                        + [f"*secondary_{i}" for i in palette_range]
+                        + [f"*neutral_{i}" for i in palette_range]
+                    )
+
+                    variable_suggestions = {
+                        "fill": core_color_suggestions[:],
+                        "color": core_color_suggestions[:],
+                        "text_size": [f"*text_{i}" for i in size_range],
+                        "radius": [f"*radius_{i}" for i in size_range],
+                        "padding": [f"*spacing_{i}" for i in size_range],
+                        "gap": [f"*spacing_{i}" for i in size_range],
+                        "weight": [
+                            "100",
+                            "200",
+                            "300",
+                            "400",
+                            "500",
+                            "600",
+                            "700",
+                            "800",
+                        ],
+                        "shadow": ["none"],
+                        "border_width": [],
+                    }
+                    for variable in flat_variables:
+                        if variable.endswith("_dark"):
+                            continue
+                        for style_type in variable_suggestions:
+                            if style_type in variable:
+                                variable_suggestions[style_type].append("*" + variable)
+                                break
+
+                    variable_suggestions["fill"], variable_suggestions["color"] = (
+                        variable_suggestions["fill"]
+                        + variable_suggestions["color"][len(core_color_suggestions) :],
+                        variable_suggestions["color"]
+                        + variable_suggestions["fill"][len(core_color_suggestions) :],
+                    )
+
+                    for group, desc, variables in variable_groups:
+                        with gr.TabItem(group):
+                            gr.Markdown(
+                                desc
+                                + "\nYou can set these to one of the dropdown values, or clear the dropdown to set a custom value."
+                            )
+                            for variable in variables:
+                                suggestions = []
+                                for style_type in variable_suggestions:
+                                    if style_type in variable:
+                                        suggestions = variable_suggestions[style_type][:]
+                                        if "*" + variable in suggestions:
+                                            suggestions.remove("*" + variable)
+                                        break
+                                dropdown = gr.Dropdown(
+                                    label=variable,
+                                    info=get_docstr(variable),
+                                    choices=suggestions,
+                                    allow_custom_value=True,
+                                )
+                                theme_var_input.append(dropdown)
+            
+            # App
 
         with gr.Column(scale=6, elem_id="app"):
             with gr.Column(variant="panel"):
@@ -455,104 +529,30 @@ with gr.Blocks(  # noqa: SIM117
                 with gr.Row():
                     html = gr.Markdown(
                     """
-                    ![GreenLake](/file=images/greenlake.png)
+                    ![GreenLake](/file=greenlake.png)
+                    """
+                    )
+                    html2 = gr.Markdown(
+                    """
+                    ![GreenLake](/file=greenlake.png)
                     """
                     )
                 with gr.Row():
-                    with gr.Column(scale=1, elem_classes=["left"]):
-                        # gr.Markdown(
-                        #     "<b>To leverage your own private documents for this quote, upload them below.<br></b>"
-                        # )
-                        with gr.Tab("Settings"):
-                            with gr.Row() as upload_field:
-                                document = gr.Files(
-                                    height=300, file_count="multiple",
-                                    file_types=["pdf"], interactive=True,
-                                    label="Upload PDF documents",
-                                    show_label=False)
-                            with gr.Row() as upload_button:
-                                upload_btn = gr.Button("Upload")
-                            with gr.Row() as upload_label:
-                                db_progress = gr.Label(
-                                    value="", show_label=False, elem_classes=["upload-label"])
-                            with gr.Row():
-                                # ctx = gr.Checkbox(
-                                #     value=True,
-                                #     label="Use Private Knowledge Base"
-                                # )
-                                ctx = gr.Radio(
-                                    choices=["Yes", "No"],
-                                    info="Give access to the uploaded files stored in your Private Knowledge Base?",
-                                    label="Private Knowledge Base",
-                                    value="Yes",
-                                    elem_classes=["menu-item"]
-                                )
-                            with gr.Row():
-                                radio_buttons = gr.Radio(
-                                    choices=["Smart", "Manual"],
-                                    info="Select mode of operation. In Smart mode, the chatbot"
-                                        " will use an intelligent model to determine the flow."
-                                        " In manual mode, you can choose the type of query to perform.",
-                                    value="Smart",
-                                    label="AI Mode",
-                                    elem_classes=["menu-item"]
-                                )
-                            with gr.Row():
-                                manual_options = gr.Radio(
-                                    choices=["Chat", "SQL Query", "Vector Store Query"],
-                                    info="Select the type of query you want to perform.",
-                                    visible=False,
-                                    label="Chat Mode",
-                                    elem_classes=["menu-item"]
-                                )
-                        with gr.Tab("Advanced"):
-                            with gr.Row():
-                                model = gr.Dropdown(
-                                    ["meta-llama/Meta-Llama-2-7B", "meta-llama/Meta-Llama-3-8B", "microsoft/Phi-3-mini-128k-instruct", "mistralai/Mistral-7B-v0.3"], interactive=True, allow_custom_value=True, value="meta-llama/Meta-Llama-2-7B", label="Large Language Model", elem_classes=["menu-item"]
-                                    )    
-                            with gr.Row():
-                                with gr.Column():
-                                    temperature = gr.Slider(
-                                        label="Temperature",
-                                        minimum=0.0,
-                                        maximum=1.0,
-                                        value=0.1,
-                                        info="The model temperature. Larger values increase"
-                                            " creativity but decrease factuality.",
-                                            elem_classes=["menu-item"]
-                                    )
-                                with gr.Column():
-                                    max_tokens = gr.Number(
-                                        label="Max Tokens",
-                                        minimum=10,
-                                        maximum=1000,
-                                        value=200,
-                                        info="The maximum number of tokens to generate.",
-                                        elem_classes=["menu-item"]
-                                    )                        
-                                    theme = gr.Radio(
-                                    choices=["None", "HPE Portfolio Assistant"],
-                                    value="None",
-                                    label="Theme",
-                                    elem_classes=["menu-item"]
-                                )
-                    with gr.Column(scale=2):
-                        with gr.Row():
-                            chatbot = gr.Chatbot(
-                                label="Chat",
-                                show_copy_button=True,
-                                elem_id="chatbot"
-                            )
-                        with gr.Row():
-                            msg = gr.Textbox(
-                                placeholder="Enter your message...",
-                                show_label=False,
-                                autofocus=True)
-                        with gr.Row():
-                            with gr.Column():
-                                submit_btn = gr.Button("Submit", variant="primary")
-                            with gr.Column():
-                                clear_btn = gr.ClearButton([msg, chatbot])
+                    chatbot = gr.Chatbot(
+                        label="Chat",
+                        show_copy_button=True,
+                        elem_id="chatbot"
+                    )
+                with gr.Row():
+                    msg = gr.Textbox(
+                        placeholder="Enter your message...",
+                        show_label=False,
+                        autofocus=True)
+                with gr.Row():
+                    with gr.Column():
+                        submit_btn = gr.Button("Submit", variant="primary")
+                    with gr.Column():
+                        clear_btn = gr.ClearButton([msg, chatbot])
 
         inputs = [msg, chatbot, temperature, max_tokens, ctx, manual_options]
 
@@ -1025,7 +1025,5 @@ with gr.Blocks(theme=theme) as demo:
         )
 
 if __name__ == "__main__":
-    file_path = os.path.abspath("images/greenlake.png")
-    absolute_path = os.path.dirname(file_path)
-    demo.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=[absolute_path])
-    # demo.launch(allowed_paths=[absolute_path])
+    # demo.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=[absolute_path])
+    demo.launch(allowed_paths=["./"])
