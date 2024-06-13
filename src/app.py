@@ -14,9 +14,13 @@ import requests
 import os
 
 
-# LOGO = """
-# [![Robot-final-comp.gif](https://i.postimg.cc/pry2R4S8/Robot-final-comp.gif)](https://postimg.cc/T5M8c7fY)
-# """
+LOGO_GREEN = """
+[![Robot-final-comp.gif](https://i.postimg.cc/8zMNb80m/Robot-dark-green-app.gif)](https://postimg.cc/tsqKXcys)
+"""
+
+LOGO_BLUE = """
+[![Robot-final-comp.gif](https://i.postimg.cc/T2Fx8HV5/Robot-light-green.gif)](https://postimg.cc/rz13xjYq)
+"""
 
 WELCOME = '''Hi! I'm the HPE Portfolio Assistant, your sales information and quote builder AI powered by HPE GreenLake & NVIDIA. 
 
@@ -236,6 +240,7 @@ def change_image(theme):
         """
         vis = True
         label = "HPE Portfolio Assistant"
+        logo = LOGO_GREEN
     elif theme == "HungryPalExpress":
         html = """
         <div style='text-align: center;' id="title-div">
@@ -244,17 +249,19 @@ def change_image(theme):
         """
         vis = True
         label = "Ordering Assistant"
+        logo = None
     else:
         html = ""
         vis = False
         label = "Chat"
+        logo = LOGO_BLUE
 
-    return [gr.update(value=html),gr.update(visible=vis), gr.update(label=label)]
+    return [gr.update(value=html),gr.update(visible=vis), gr.update(label=label), gr.update(placeholder=logo)]
 
 with gr.Blocks(  # noqa: SIM117
     theme=gr.themes.Base(),
     css=css,
-    title="Gradio Theme Builder",
+    title="HPE Private Cloud for AI",
 ) as demo:
     with gr.Row():
         with gr.Column(scale=1, elem_id="controls", min_width=400):
@@ -552,7 +559,8 @@ with gr.Blocks(  # noqa: SIM117
                     chatbot = gr.Chatbot(
                         label="Chat",
                         show_copy_button=True,
-                        elem_id="chatbot"
+                        elem_id="chatbot",
+                        placeholder=LOGO_BLUE
                     )
                 with gr.Row():
                     msg = gr.Textbox(
@@ -578,9 +586,7 @@ with gr.Blocks(  # noqa: SIM117
             [ctx, manual_options]
         )
 
-        base_theme_dropdown.change(change_image, base_theme_dropdown, [html, html, chatbot])
-
-
+        base_theme_dropdown.change(change_image, base_theme_dropdown, [html, html, chatbot, chatbot])
 
         msg.submit(chat_service, inputs, [msg, chatbot])
                 
@@ -1038,5 +1044,5 @@ with gr.Blocks(theme=theme) as demo:
         )
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=["./"])
-    # demo.launch(allowed_paths=["./"])
+    # demo.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=["./"])
+    demo.launch(allowed_paths=["./"])
