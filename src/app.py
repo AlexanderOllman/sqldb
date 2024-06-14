@@ -3,7 +3,7 @@ import time
 from typing import Iterable
 from pa_theme import PortfolioAssistant
 from hungry_theme import HungryPalExpress
-
+from random import randint
 from gradio_client.documentation import document_fn
 
 import gradio as gr
@@ -63,8 +63,10 @@ def chat_service(
         manual_options,
         request: gr.Request):
     if "quote" in message:
+        number = randint(10000, 99999)
+        time.sleep(3)
         href = "https://ww1.microchip.com/downloads/en/DeviceDoc/02-10512-1-R2_BOM_Web.pdf"
-        bot_message = f"Of course! Here is a quote for 8 HPE DL380a Gen11 4DW CTO Svr: [Download]({href})"
+        bot_message = f"Of course! Here is a reference quote for eight HPE DL380a Gen11 4DW CTO Svr: [Quote #{str(number)}]({href})"
     else:
         headers = {"Authorization": request.headers.get("authorization")}
 
@@ -266,17 +268,16 @@ with gr.Blocks(  # noqa: SIM117
     with gr.Row():
         with gr.Column(scale=1, elem_id="controls", min_width=400):
             with gr.Tab("Settings"):
-                with gr.Row() as upload_field:
-                    document = gr.Files(
-                        height=300, file_count="multiple",
-                        file_types=["pdf"], interactive=True,
-                        label="Upload PDF documents",
-                        show_label=False)
-                with gr.Row() as upload_button:
-                    upload_btn = gr.Button("Upload")
-                with gr.Row() as upload_label:
-                    db_progress = gr.Label(
-                        value="", show_label=False, elem_classes=["upload-label"])
+                with gr.Row():
+                    radio_buttons = gr.Radio(
+                        choices=["Smart", "Manual"],
+                        info="Select mode of operation. In Smart mode, the chatbot"
+                            " will use an intelligent model to determine the flow."
+                            " In manual mode, you can choose the type of query to perform.",
+                        value="Smart",
+                        label="AI Mode",
+                        elem_classes=["menu-item"]
+                    )
                 with gr.Row():
                     # ctx = gr.Checkbox(
                     #     value=True,
@@ -289,17 +290,6 @@ with gr.Blocks(  # noqa: SIM117
                         value="Yes",
                         elem_classes=["menu-item"]
                     )
-                with gr.Row():
-                    radio_buttons = gr.Radio(
-                        choices=["Smart", "Manual"],
-                        info="Select mode of operation. In Smart mode, the chatbot"
-                            " will use an intelligent model to determine the flow."
-                            " In manual mode, you can choose the type of query to perform.",
-                        value="Smart",
-                        label="AI Mode",
-                        elem_classes=["menu-item"]
-                    )
-                with gr.Row():
                     manual_options = gr.Radio(
                         choices=["Chat", "SQL Query", "Vector Store Query"],
                         info="Select the type of query you want to perform.",
@@ -307,6 +297,17 @@ with gr.Blocks(  # noqa: SIM117
                         label="Chat Mode",
                         elem_classes=["menu-item"]
                     )
+                with gr.Row() as upload_field:
+                    document = gr.Files(
+                        height=300, file_count="multiple",
+                        file_types=["pdf"], interactive=True,
+                        label="Upload PDF documents",
+                        show_label=False)
+                with gr.Row() as upload_button:
+                    upload_btn = gr.Button("Upload")
+                with gr.Row() as upload_label:
+                    db_progress = gr.Label(
+                        value="", show_label=False, elem_classes=["upload-label"])
             with gr.Tab("Advanced"):
                 with gr.Row():
                     model = gr.Dropdown(
@@ -332,12 +333,6 @@ with gr.Blocks(  # noqa: SIM117
                             info="The maximum number of tokens to generate.",
                             elem_classes=["menu-item"]
                         )                        
-                        theme = gr.Radio(
-                        choices=["None", "HPE Portfolio Assistant"],
-                        value="None",
-                        label="Theme",
-                        elem_classes=["menu-item"]
-                    )
             with gr.Tab("Theme"):
                 with gr.Row():
                     undo_btn = gr.Button("Undo", size="sm")
@@ -348,8 +343,7 @@ with gr.Blocks(  # noqa: SIM117
                         value="Base",
                         show_label=False,
                         label="Theme",
-                        info= "Select a base theme below you would like to build off of. Note: when you click 'Load Theme', all variable values in other tabs will be overwritten!"
-
+                        info= "Select the theme for your assistant. Click 'Load Theme' to fully apply."
                     )
                 with gr.Row():
                     load_theme_btn = gr.Button("Load Theme", elem_id="load_theme")
@@ -1044,5 +1038,5 @@ with gr.Blocks(theme=theme) as demo:
         )
 
 if __name__ == "__main__":
-    # demo.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=["./"])
-    demo.launch(allowed_paths=["./"])
+    # demo.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=["./"],favicon_path='favicon.ico')
+    demo.launch(allowed_paths=["./"], favicon_path='favicon.ico')
