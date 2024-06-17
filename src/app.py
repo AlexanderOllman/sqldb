@@ -368,7 +368,7 @@ with gr.Blocks(  # noqa: SIM117
                         label="Upload PDF documents",
                         show_label=False)
                 with gr.Row() as upload_button:
-                    upload_btn = gr.Button("Upload")
+                    upload_btn = gr.Button("Update Knowledge Base")
                 with gr.Row() as upload_label:
                     db_progress = gr.Label(
                         value="", show_label=False, elem_classes=["upload-label"])
