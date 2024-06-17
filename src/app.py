@@ -5,9 +5,9 @@ from pa_theme import PortfolioAssistant
 from hungry_theme import HungryPalExpress
 from random import randint
 from gradio_client.documentation import document_fn
-
+import re
 import gradio as gr
-
+import fitz
 import logging
 
 import requests
@@ -54,6 +54,60 @@ def load_session_variables():
     return array
 
 
+def generate_quote(new_name, opp_id, ucid, output_path):
+    # Open the PDF file
+    pdf_path = "quote_template.pdf"
+    document = fitz.open(pdf_path)
+    
+    # Iterate through the pages
+    for page_num in range(len(document)):
+        page = document[page_num]
+        text_instances = page.search_for("Customer Name: Not Available")
+        num_instances = page.search_for("5138883180-01")
+        
+        # If "Customer Name: Not Available" is found, replace it
+        for inst in text_instances:
+            # Define the white background rectangle
+            rect = fitz.Rect(inst.x0-10, inst.y0, inst.x1, inst.y1+20)
+            page.draw_rect(rect, color=(1, 1, 1), fill=(1, 1, 1))
+            
+            # Insert new text with matching font
+                        # Insert new text slightly to the right and down
+            x_offset = 13.5  # Adjust this value as needed
+            y_offset = 6  # Adjust this value as needed
+            page.insert_text((inst.x0 + x_offset, inst.y0 + y_offset), f"Customer Name: {new_name}", fontsize=8, color=(0, 0, 0))
+
+            x_offset2 = 13.5  # Adjust this value as needed
+            y_offset2 = 24  # Adjust this value as needed
+            page.insert_text((inst.x0 + x_offset2, inst.y0 + y_offset2), f"Opportunity ID: {opp_id}", fontsize=8, color=(0, 0, 0))
+
+        for inst in num_instances:
+            if inst == num_instances[0]:
+                # Define the white background rectangle
+                rect = fitz.Rect(inst.x0-10, inst.y0, inst.x1, inst.y1)
+                page.draw_rect(rect, color=(1, 1, 1), fill=(1, 1, 1))
+                
+                # Insert new text with matching font
+                            # Insert new text slightly to the right and down
+                x_offset = 0  # Adjust this value as needed
+                y_offset = 7.5  # Adjust this value as needed
+                page.insert_text((inst.x0 - x_offset, inst.y0 + y_offset), f"{ucid}", fontsize=9.8, color=(0, 0, 0))
+
+            if inst == num_instances[1]:
+                # Define the white background rectangle
+                rect = fitz.Rect(inst.x0-10, inst.y0, inst.x1, inst.y1)
+                page.draw_rect(rect, color=(1, 1, 1), fill=(1, 1, 1))
+                
+                # Insert new text with matching font
+                            # Insert new text slightly to the right and down
+                x_offset = 0  # Adjust this value as needed
+                y_offset = 7.5  # Adjust this value as needed
+                page.insert_text((inst.x0 - x_offset, inst.y0 + y_offset), f"{ucid}", fontsize=8.8, color=(0, 0, 0))
+
+
+    # Save the modified PDF to a new file
+    document.save(output_path)
+
 def chat_service(
         message,
         chat_history,
@@ -63,10 +117,24 @@ def chat_service(
         manual_options,
         request: gr.Request):
     if "quote" in message:
-        number = randint(10000, 99999)
+        time.sleep(2)
+        # bot_message = f"Of course! Here is a reference quote for eight HPE DL380a Gen11 4DW CTO Svr: [Quote #{str(number)}]({href})"
+        bot_message = "Please provide your customer's name."
+    elif "name" in message:
+        quote_number = randint(10000000, 99999999)
+        opp_number = randint(100000000, 999999999)
         time.sleep(3)
-        href = "https://ww1.microchip.com/downloads/en/DeviceDoc/02-10512-1-R2_BOM_Web.pdf"
-        bot_message = f"Of course! Here is a reference quote for eight HPE DL380a Gen11 4DW CTO Svr: [Quote #{str(number)}]({href})"
+        ucid = f"51{quote_number}-01"
+        opp_id = f"OPP-{opp_number}"
+        customer = re.findall(r'\b[A-Z][a-z]*\b', message)
+        customer_name = ''
+        for i in customer:
+            customer_name += i + ' '
+        generate_quote(customer_name, opp_id, ucid, "quote.pdf")
+        href = "/file=quote.pdf"
+        sf_href = "https://salesforce.com"
+        bot_message = f"Here is a reference quote for {customer_name} for eight HPE DL380a Gen11 4DW CTO Svr: [Quote #{str(ucid)}]({href}). \n\n I've also generated a Salesforce Opportunity for this quote: [{opp_id}]({sf_href})."
+        
     else:
         headers = {"Authorization": request.headers.get("authorization")}
 
@@ -92,10 +160,6 @@ def chat_service(
             URL.format(NAMESPACE, "invoke"), json=inputs, headers=headers)
 
         logger.info(f"Response: {response.text}")
-
-        if "quote" in message:
-            href = "https://www.google.com/"
-            bot_message = f"[This is a link to your quote.]({href})"
 
         bot_message = response.json()["output"]
 
@@ -1038,5 +1102,5 @@ with gr.Blocks(theme=theme) as demo:
         )
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=["./"],favicon_path='favicon.ico')
-    # demo.launch(allowed_paths=["./"], favicon_path='favicon.ico')
+    # demo.launch(server_name="0.0.0.0", server_port=8080, allowed_paths=["./"],favicon_path='favicon.ico')
+    demo.launch(allowed_paths=["./"], favicon_path='favicon.ico')
